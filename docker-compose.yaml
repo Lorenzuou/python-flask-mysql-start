@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: mydatabase
+    volumes:
+      - ./sql/database_creation.sql:/docker-entrypoint-initdb.d/database_creation.sql
+      - ./db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+  
+  flask_app:
+    build: ./flask_app
+    command: bash -c "python3 server.py"
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    volumes:
+      - "./flask_app:/app"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: myrootpassword
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
